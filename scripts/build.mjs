@@ -3,7 +3,7 @@
 // KaTeX's stylesheet + fonts so math renders fully offline.
 
 import { build } from 'esbuild';
-import { cp, mkdir, rm, readdir } from 'node:fs/promises';
+import { cp, mkdir, rm, readdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,9 +30,35 @@ async function bundle() {
       minify: true,
       sourcemap: false,
       legalComments: 'none',
+      charset: 'ascii', // escapes non-ASCII in strings/identifiers (but NOT regex)
       logLevel: 'info',
       define: { 'process.env.NODE_ENV': '"production"' },
     });
+  }
+  await asciifyOutputs();
+}
+
+// Chrome's content-script loader rejects files containing raw multibyte UTF-8
+// ("It isn't UTF-8 encoded"). esbuild's charset:ascii misses characters inside
+// regex literals (e.g. accented ranges in a bundled lib), so escape every
+// remaining non-ASCII UTF-16 code unit to \uXXXX. This is semantically
+// identical inside strings, regex, and identifiers, and yields a pure-ASCII
+// (always loadable) bundle.
+function asciify(src) {
+  let out = '';
+  for (let i = 0; i < src.length; i++) {
+    const code = src.charCodeAt(i);
+    out += code > 0x7f ? '\\u' + code.toString(16).padStart(4, '0') : src[i];
+  }
+  return out;
+}
+
+async function asciifyOutputs() {
+  for (const e of entries) {
+    const p = r(e.out);
+    const src = await readFile(p, 'utf8');
+    const ascii = asciify(src);
+    if (ascii !== src) await writeFile(p, ascii, 'utf8');
   }
 }
 
