@@ -22,6 +22,7 @@ import ins from 'markdown-it-ins';
 import abbr from 'markdown-it-abbr';
 import { full as emoji } from 'markdown-it-emoji';
 import { tasklist } from '@mdit/plugin-tasklist';
+import { load as yamlLoad, FAILSAFE_SCHEMA } from 'js-yaml';
 import hljs from 'highlight.js/lib/common';
 
 // A few extra languages beyond the "common" bundle that matter for scientific
@@ -165,8 +166,85 @@ function slugify(text) {
     .replace(/^-|-$/g, '');
 }
 
+// ── YAML front matter ───────────────────────────────────────────────────
+// A `---` … `---` metadata block at the very top of a document is a near-
+// universal convention (GitHub, Obsidian, Jekyll, Hugo, Pandoc). CommonMark
+// doesn't define it, so without handling it the block mis-parses as a setext
+// heading. We strip it from the body and render it as a metadata table, the
+// way GitHub's reading view does.
+
+// Split a leading YAML front-matter block from the body. Only matches when the
+// document starts (optionally after a BOM) with `---` on its own line and has a
+// matching closing `---` line. Returns { frontMatter, body }.
+export function splitFrontMatter(src) {
+  if (src.charCodeAt(0) === 0xfeff) src = src.slice(1); // strip a leading BOM
+  const m = /^---[ \t]*\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/.exec(src);
+  if (!m) return { frontMatter: null, body: src };
+  return { frontMatter: m[1], body: src.slice(m[0].length) };
+}
+
+function formatFrontMatterValue(v) {
+  if (v == null || v === '') return '<span class="mdv-fm-empty">—</span>';
+  if (Array.isArray(v)) {
+    if (!v.length) return '<span class="mdv-fm-empty">—</span>';
+    return (
+      '<span class="mdv-fm-tags">' +
+      v
+        .map((item) =>
+          item != null && typeof item === 'object'
+            ? '<code>' + escapeHtml(JSON.stringify(item)) + '</code>'
+            : '<span class="mdv-fm-tag">' + escapeHtml(String(item)) + '</span>'
+        )
+        .join('') +
+      '</span>'
+    );
+  }
+  if (typeof v === 'object') return '<code>' + escapeHtml(JSON.stringify(v)) + '</code>';
+  // Scalars are kept as strings (FAILSAFE schema), so dates/numbers show verbatim.
+  return escapeHtml(String(v));
+}
+
+function rawFrontMatterBlock(yamlText) {
+  let inner;
+  try {
+    inner = hljs.highlight(yamlText, { language: 'yaml', ignoreIllegals: true }).value;
+  } catch {
+    inner = escapeHtml(yamlText);
+  }
+  return (
+    '<pre class="mdv-code hljs mdv-frontmatter-raw"><code data-lang="yaml">' +
+    inner +
+    '</code></pre>'
+  );
+}
+
+export function renderFrontMatter(yamlText) {
+  let data;
+  try {
+    // FAILSAFE: keep every scalar as a string — no type coercion, dates/tags
+    // render exactly as authored.
+    data = yamlLoad(yamlText, { schema: FAILSAFE_SCHEMA });
+  } catch {
+    return rawFrontMatterBlock(yamlText); // malformed — show it, don't mangle it
+  }
+  if (data == null || typeof data !== 'object' || Array.isArray(data)) {
+    return rawFrontMatterBlock(yamlText);
+  }
+  const entries = Object.entries(data);
+  if (!entries.length) return '';
+  const rows = entries
+    .map(
+      ([k, v]) =>
+        '<tr><th scope="row">' + escapeHtml(k) + '</th><td>' + formatFrontMatterValue(v) + '</td></tr>'
+    )
+    .join('');
+  return '<table class="mdv-frontmatter"><tbody>' + rows + '</tbody></table>';
+}
+
 let _shared = null;
 export function renderMarkdown(src, opts) {
   if (!_shared) _shared = createRenderer(opts);
-  return _shared.render(src);
+  const { frontMatter, body } = splitFrontMatter(src);
+  const bodyHtml = _shared.render(body);
+  return frontMatter != null ? renderFrontMatter(frontMatter) + bodyHtml : bodyHtml;
 }

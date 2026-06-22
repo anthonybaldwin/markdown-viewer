@@ -152,8 +152,8 @@ function enhance(refs, settings) {
     pre.appendChild(btn);
   }
 
-  // Wrap tables for horizontal scroll
-  for (const table of article.querySelectorAll('table')) {
+  // Wrap content tables for horizontal scroll (not the front-matter table)
+  for (const table of article.querySelectorAll('table:not(.mdv-frontmatter)')) {
     if (table.parentElement && table.parentElement.classList.contains('mdv-table-wrap')) continue;
     const wrap = el('div', { class: 'mdv-table-wrap' });
     table.parentNode.insertBefore(wrap, table);

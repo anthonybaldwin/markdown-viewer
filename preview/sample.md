@@ -1,3 +1,12 @@
+---
+title: The Markdown Viewer
+description: A safe, extensive Markdown reading surface for the browser
+publishedDate: 2026-06-22T08:00:00Z
+dateCreated: 2026-06-20T14:30:00Z
+tags: [chrome-extension, markdown, katex, mermaid]
+draft: false
+---
+
 # The Markdown Viewer
 
 A calm, **safe** reading surface for `.md` files — with math, code, diagrams,

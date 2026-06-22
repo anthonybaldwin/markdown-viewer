@@ -19,6 +19,7 @@
     "dompurify": "^3.4.11",
     "esbuild": "^0.28.1",
     "highlight.js": "^11.11.1",
+    "js-yaml": "^5.0.0",
     "jsdom": "^29.1.1",
     "katex": "^0.17.0",
     "markdown-it": "^14.2.0",

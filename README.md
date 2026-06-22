@@ -1,8 +1,9 @@
 # Markdown Viewer
 
 A Chrome extension (Manifest V3) that renders `.md` files in the browser — GFM,
-math (KaTeX + mhchem), syntax highlighting, and Mermaid diagrams. Documents are
-sanitized with DOMPurify before display. Runs only on sites you allow.
+YAML front matter, math (KaTeX + mhchem), syntax highlighting, and Mermaid
+diagrams. Documents are sanitized with DOMPurify before display. Runs only on
+sites you allow.
 
 ## Install
 
