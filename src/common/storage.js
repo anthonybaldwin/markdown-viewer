@@ -70,7 +70,9 @@ export function urlToPattern(rawUrl) {
   }
   if (u.protocol === 'file:') return 'file:///*';
   if (u.protocol === 'http:' || u.protocol === 'https:') {
-    return `${u.protocol}//${u.host}/*`;
+    // Use hostname, NOT host: Chrome match patterns can't contain a port, and a
+    // port-less pattern matches every port on that host (e.g. :8088).
+    return `${u.protocol}//${u.hostname}/*`;
   }
   return null;
 }

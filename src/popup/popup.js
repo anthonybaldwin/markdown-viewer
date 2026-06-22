@@ -127,6 +127,9 @@ async function main() {
       await addToAllowlist(pattern);
       setNote(null);
       await refreshCount();
+      // Wait for the background to register the script + content-type rule
+      // before reloading, so the rule is live when the request fires.
+      await chrome.runtime.sendMessage({ type: 'mdv-sync' }).catch(() => {});
       if (tab && tab.id != null) chrome.tabs.reload(tab.id);
     } else {
       await removeFromAllowlist(pattern);
@@ -134,6 +137,7 @@ async function main() {
         if (!isFile) await chrome.permissions.remove({ origins: [pattern] });
       } catch {}
       await refreshCount();
+      await chrome.runtime.sendMessage({ type: 'mdv-sync' }).catch(() => {});
       if (tab && tab.id != null) chrome.tabs.reload(tab.id);
     }
   });

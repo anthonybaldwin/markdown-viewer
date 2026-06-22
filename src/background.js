@@ -11,6 +11,61 @@ import { getAllowlist, removeFromAllowlist } from './common/storage.js';
 
 const DETECTOR_ID = 'mdv-detector';
 
+// URLs that look like markdown files (used to scope the content-type override).
+const MD_URL_REGEX =
+  '\\.(md|markdown|mdown|mkd|mkdn|mdwn|mdtxt|mdtext|rmd|qmd|ronn|workbook)([?#].*)?$';
+
+function hostsFromAllowlist(patterns) {
+  const hosts = [];
+  for (const p of patterns) {
+    const m = /^https?:\/\/([^/]+)\/\*$/.exec(p);
+    if (m) hosts.push(m[1]);
+  }
+  return hosts;
+}
+
+// Some servers correctly send `Content-Type: text/markdown`, which Chrome
+// downloads instead of displaying. For allowlisted hosts, rewrite the response
+// content type of top-level markdown navigations to text/plain so Chrome shows
+// it inline (as a <pre>) and the renderer can take over. Scoped to main_frame
+// requests whose URL ends in a markdown extension, on allowlisted hosts only.
+async function syncDnrRules() {
+  let existing = [];
+  try {
+    existing = await chrome.declarativeNetRequest.getDynamicRules();
+  } catch {
+    return;
+  }
+  const removeRuleIds = existing.map((r) => r.id);
+
+  const hosts = hostsFromAllowlist(await getAllowlist());
+  const addRules = hosts.map((host, i) => ({
+    id: i + 1,
+    priority: 1,
+    action: {
+      type: 'modifyHeaders',
+      responseHeaders: [
+        { header: 'content-type', operation: 'set', value: 'text/plain; charset=utf-8' },
+      ],
+    },
+    condition: {
+      requestDomains: [host],
+      resourceTypes: ['main_frame'],
+      regexFilter: MD_URL_REGEX,
+    },
+  }));
+
+  try {
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+  } catch (e) {
+    console.warn('[markdown-viewer] failed to update content-type rules:', e);
+  }
+}
+
+async function syncAll() {
+  await Promise.all([syncRegistration(), syncDnrRules()]);
+}
+
 async function hasHostPermission(pattern) {
   try {
     return await chrome.permissions.contains({ origins: [pattern] });
@@ -84,7 +139,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === 'mdv-sync') {
-    syncRegistration().then(() => sendResponse({ ok: true }));
+    syncAll().then(() => sendResponse({ ok: true }));
     return true;
   }
 });
@@ -94,16 +149,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 chrome.permissions.onRemoved.addListener(async (perms) => {
   const origins = perms.origins || [];
   for (const o of origins) await removeFromAllowlist(o);
-  await syncRegistration();
+  await syncAll();
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.allowlist) syncRegistration();
+  if (area === 'local' && changes.allowlist) syncAll();
 });
 
-chrome.runtime.onStartup.addListener(syncRegistration);
+chrome.runtime.onStartup.addListener(syncAll);
 chrome.runtime.onInstalled.addListener((details) => {
-  syncRegistration();
+  syncAll();
   if (details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html?welcome=1') });
   }
