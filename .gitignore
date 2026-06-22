@@ -1,0 +1,23 @@
+# dependencies (bun install)
+node_modules
+
+# dev-only demo bundle (regenerate with `bun run demo`)
+preview/preview.bundle.js
+
+# NOTE: dist/ IS committed on purpose — it holds the built extension bundles
+# so the extension can be loaded unpacked without a build step.
+
+*.tgz
+coverage
+*.lcov
+logs
+*.log
+.env
+.env.*.local
+.env.local
+.eslintcache
+.cache
+*.tsbuildinfo
+.idea
+.DS_Store
+Thumbs.db

@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Markdown Viewer — Safe & Extensive",
+  "short_name": "Markdown Viewer",
+  "version": "1.0.0",
+  "description": "Render .md files beautifully and safely: GFM, math (KaTeX), syntax highlighting, and diagrams — sanitized so nothing in a document can execute. Per-site opt-in.",
+  "homepage_url": "https://github.com/anthonybaldwin/markdown-viewer",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Markdown Viewer",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "scripting", "activeTab"],
+  "optional_host_permissions": ["*://*/*", "file:///*"],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "vendor/katex/katex.min.css",
+        "vendor/katex/fonts/*",
+        "src/content/viewer.css"
+      ],
+      "matches": ["file:///*", "http://*/*", "https://*/*"]
+    }
+  ],
+  "minimum_chrome_version": "111"
+}

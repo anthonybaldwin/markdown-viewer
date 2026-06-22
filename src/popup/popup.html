@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Markdown Viewer</title>
+    <link rel="stylesheet" href="../common/ui.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="pop">
+      <header class="pop-head">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="eyebrow">Markdown Viewer</div>
+          <h1 class="pop-title">Safe rendering, per site</h1>
+        </div>
+      </header>
+
+      <section class="card site-card" id="site-card">
+        <div class="row site-row">
+          <div class="site-meta">
+            <div class="eyebrow" id="site-kind">This site</div>
+            <div class="site-host" id="site-host">—</div>
+          </div>
+          <label class="switch" title="Enable on this site">
+            <input type="checkbox" id="site-toggle" />
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+        </div>
+        <p class="site-note" id="site-note" hidden></p>
+      </section>
+
+      <footer class="pop-foot">
+        <span class="count" id="count">No sites enabled yet</span>
+        <a href="#" id="open-options" class="btn btn-ghost">All sites &amp; settings →</a>
+      </footer>
+    </div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

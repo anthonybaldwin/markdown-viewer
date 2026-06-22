@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Markdown Viewer — Preview</title>
+    <link rel="stylesheet" href="../vendor/katex/katex.min.css" />
+    <link rel="stylesheet" href="../src/content/viewer.css" />
+  </head>
+  <body>
+    <!-- The sample is fetched as a real .md file (preview/sample.md) and run
+         through the actual render→sanitize pipeline. It is deliberately NOT
+         embedded in the HTML, so document content can never break out of the
+         page. Mermaid comes from the built bundle. -->
+    <script src="../dist/mermaid.js"></script>
+    <script type="module" src="preview.bundle.js"></script>
+  </body>
+</html>

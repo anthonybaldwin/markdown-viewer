@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Markdown Viewer — Settings</title>
+    <link rel="stylesheet" href="../common/ui.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="masthead">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="eyebrow">Markdown Viewer</div>
+          <h1>Settings</h1>
+        </div>
+      </header>
+
+      <div class="welcome card" id="welcome" hidden>
+        <h2>You’re set up. One more step to start reading.</h2>
+        <p>
+          For privacy, Markdown Viewer does nothing until you allow it on a site.
+          Add the sites you read markdown on below — or enable
+          <b>local files</b> to render <code>.md</code> files you open from disk.
+        </p>
+      </div>
+
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Where it runs</div>
+            <h2>Allowed sites</h2>
+          </div>
+          <span class="pill" id="sites-count">0</span>
+        </div>
+        <p class="hint">
+          Nothing runs anywhere that isn’t listed here. Remove a site any time to
+          revoke access.
+        </p>
+
+        <div class="file-row row">
+          <div>
+            <div class="file-title">Local files <span class="mono-host">file://</span></div>
+            <div class="hint" id="file-hint">Render <code>.md</code> files opened from your computer.</div>
+          </div>
+          <label class="switch" title="Enable local files">
+            <input type="checkbox" id="file-toggle" />
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+        </div>
+
+        <ul class="site-list" id="site-list"></ul>
+
+        <div class="add-row row">
+          <input
+            type="text"
+            id="add-input"
+            class="text-input"
+            placeholder="example.com  or  https://docs.example.com"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <button class="btn btn-primary" id="add-btn">Add site</button>
+        </div>
+        <div class="hint add-error" id="add-error" hidden></div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">How it reads</div>
+            <h2>Appearance &amp; rendering</h2>
+          </div>
+        </div>
+
+        <div class="setting">
+          <div class="setting-label"><div class="t">Theme</div><div class="hint">Light, dark, or follow your system.</div></div>
+          <div class="seg" id="seg-theme" role="group" aria-label="Theme">
+            <button data-val="auto">Auto</button>
+            <button data-val="light">Light</button>
+            <button data-val="dark">Dark</button>
+          </div>
+        </div>
+
+        <div class="setting">
+          <div class="setting-label"><div class="t">Reading width</div><div class="hint">Comfortable measure, or use the full window.</div></div>
+          <div class="seg" id="seg-width" role="group" aria-label="Reading width">
+            <button data-val="comfortable">Comfortable</button>
+            <button data-val="full">Full width</button>
+          </div>
+        </div>
+
+        <div class="setting toggle-row">
+          <div class="setting-label"><div class="t">Table of contents</div><div class="hint">Show the live section rail on the left.</div></div>
+          <label class="switch"><input type="checkbox" id="opt-toc" /><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="setting toggle-row">
+          <div class="setting-label"><div class="t">Diagrams</div><div class="hint">Render <code>```mermaid</code> blocks as diagrams.</div></div>
+          <label class="switch"><input type="checkbox" id="opt-mermaid" /><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="setting toggle-row">
+          <div class="setting-label"><div class="t">Smart typography</div><div class="hint">Curly quotes, dashes, and ellipses.</div></div>
+          <label class="switch"><input type="checkbox" id="opt-typographer" /><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="setting toggle-row">
+          <div class="setting-label"><div class="t">Auto-link URLs</div><div class="hint">Turn bare links into clickable links.</div></div>
+          <label class="switch"><input type="checkbox" id="opt-linkify" /><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="setting toggle-row">
+          <div class="setting-label"><div class="t">Line breaks</div><div class="hint">Treat every newline as a hard break.</div></div>
+          <label class="switch"><input type="checkbox" id="opt-breaks" /><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="setting toggle-row">
+          <div class="setting-label"><div class="t">Wrap code</div><div class="hint">Soft-wrap long lines in code blocks.</div></div>
+          <label class="switch"><input type="checkbox" id="opt-softWrapCode" /><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <p class="hint reload-note">Open documents update theme and width instantly; other changes apply on reload.</p>
+      </section>
+
+      <section class="card section safety">
+        <div class="eyebrow">Why it’s safe</div>
+        <h2>Nothing in a document can run</h2>
+        <p class="hint">
+          Markdown is parsed, then every byte is passed through DOMPurify before
+          it reaches the page: no scripts, no inline event handlers, no
+          remote-loading frames, no <code>javascript:</code> links. Math is
+          rendered by KaTeX after sanitizing (it executes no code), and diagrams
+          render in Mermaid’s strict mode and are scrubbed again before display.
+          Everything is bundled locally — no network calls, no telemetry.
+        </p>
+        <a class="repo-link" id="repo-link" href="#" target="_blank" rel="noopener">View the source ↗</a>
+      </section>
+
+      <footer class="foot">
+        <span class="mono-host" id="version">Markdown Viewer</span>
+      </footer>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

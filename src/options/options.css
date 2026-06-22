@@ -1,0 +1,94 @@
+.wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+
+.masthead { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+.masthead h1 { margin: 2px 0 0; font-size: 26px; font-weight: 680; }
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 11px; flex: none;
+  background: linear-gradient(140deg, var(--accent), var(--accent-strong));
+  position: relative; box-shadow: var(--shadow);
+}
+.brand-mark::after {
+  content: ""; position: absolute; inset: 0;
+  -webkit-mask:
+    linear-gradient(#000, #000) center/3px 17px no-repeat,
+    linear-gradient(#000, #000) center bottom 11px/12px 3px no-repeat;
+  mask:
+    linear-gradient(#000, #000) center/3px 17px no-repeat,
+    linear-gradient(#000, #000) center bottom 11px/12px 3px no-repeat;
+  background: #fff; opacity: 0.95;
+}
+
+.section { padding: 22px; margin-bottom: 18px; }
+.section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.section-head h2, .section h2 { margin: 3px 0 0; font-size: 18px; font-weight: 640; }
+.hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.hint code, .safety code, .file-title code, .setting-label code {
+  font-family: var(--mono); font-size: 0.9em;
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 0.05em 0.35em; border-radius: 5px;
+}
+.mono-host { font-family: var(--mono); font-size: 0.86em; color: var(--faint); }
+
+.welcome { padding: 18px 20px; margin-bottom: 18px; border-left: 3px solid var(--accent); }
+.welcome h2 { margin: 0 0 6px; font-size: 16px; }
+.welcome p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.welcome b { color: var(--text); }
+
+/* file row */
+.file-row {
+  justify-content: space-between;
+  padding: 14px; margin: 14px 0 6px;
+  border: 1px solid var(--border); border-radius: 11px; background: var(--surface-2);
+}
+.file-title { font-weight: 600; }
+
+/* site list */
+.site-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.site-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 11px 4px 11px 12px; border-bottom: 1px solid var(--border);
+}
+.site-list li:last-child { border-bottom: 0; }
+.site-list .host { font-family: var(--mono); font-size: 13px; word-break: break-all; }
+.site-list .empty { color: var(--faint); font-style: italic; padding: 14px 4px; }
+
+/* add row */
+.add-row { margin-top: 14px; }
+.text-input {
+  flex: 1 1 auto; height: 38px; padding: 0 12px;
+  border: 1px solid var(--border-strong); border-radius: 9px;
+  background: var(--surface); color: var(--text);
+  font: inherit; font-size: 13.5px;
+}
+.text-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.add-error { color: var(--danger); }
+
+/* settings rows */
+.setting {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 0; border-top: 1px solid var(--border);
+}
+.section-head + .setting, .setting:first-of-type { border-top: 0; }
+.setting-label .t { font-weight: 580; }
+.reload-note { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+/* segmented control */
+.seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
+.seg button {
+  height: 30px; padding: 0 13px; border: 0; border-radius: 7px;
+  background: transparent; color: var(--muted);
+  font: inherit; font-size: 12.5px; cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] {
+  background: var(--surface); color: var(--accent-strong);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08); font-weight: 600;
+}
+:root[data-theme="dark"] .seg button[aria-pressed="true"] { background: var(--border); }
+
+.safety h2 { margin-top: 3px; }
+.repo-link { display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 560; text-decoration: none; }
+.repo-link:hover { text-decoration: underline; }
+
+.foot { text-align: center; margin-top: 26px; }

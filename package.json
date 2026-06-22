@@ -1,0 +1,37 @@
+{
+  "name": "markdown-viewer",
+  "version": "1.0.0",
+  "description": "A safe, extensive Markdown viewer Chrome extension (Manifest V3).",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/anthonybaldwin/markdown-viewer",
+  "scripts": {
+    "build": "bun run scripts/build.mjs",
+    "icons": "bun run scripts/icons.mjs",
+    "test": "bun run test/security.mjs",
+    "serve": "bun run scripts/serve.mjs",
+    "demo": "bun run build && esbuild preview/preview-entry.js --bundle --format=esm --outfile=preview/preview.bundle.js --target=chrome111 --minify && bun run scripts/serve.mjs",
+    "dist": "bun run build && bun run icons && bun run test"
+  },
+  "devDependencies": {
+    "@mdit/plugin-tasklist": "^0.23.2",
+    "dompurify": "^3.4.11",
+    "esbuild": "^0.28.1",
+    "highlight.js": "^11.11.1",
+    "jsdom": "^29.1.1",
+    "katex": "^0.17.0",
+    "markdown-it": "^14.2.0",
+    "markdown-it-abbr": "^2.0.0",
+    "markdown-it-deflist": "^3.0.1",
+    "markdown-it-emoji": "^3.0.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-ins": "^4.0.0",
+    "markdown-it-mark": "^4.0.0",
+    "markdown-it-sub": "^2.0.0",
+    "markdown-it-sup": "^2.0.0",
+    "markdown-it-texmath": "^1.0.0",
+    "mermaid": "^11.15.0",
+    "sharp": "^0.35.2"
+  }
+}
