@@ -107,6 +107,67 @@ function highlight(code, lang) {
   );
 }
 
+// ── GitHub-style alerts (admonitions) ───────────────────────────────────
+// A blockquote whose first line is `[!NOTE]` (or TIP / IMPORTANT / WARNING /
+// CAUTION) becomes a styled callout, the way GitHub's reading view renders it.
+// We can't emit an inline <svg> icon — the sanitizer strips <svg> as an XSS
+// vector — so the icon is drawn entirely from trusted CSS (viewer.css) via the
+// `.mdv-alert-icon` class. The label text ("Note", …) is the accessible name.
+const ALERT_LABELS = {
+  note: 'Note',
+  tip: 'Tip',
+  important: 'Important',
+  warning: 'Warning',
+  caution: 'Caution',
+};
+
+function alertPlugin(md) {
+  // Runs after the block tokenizer but before inline parsing, so editing an
+  // inline token's `.content` here is picked up when inline rules run later.
+  md.core.ruler.after('block', 'mdv_alerts', (state) => {
+    const tokens = state.tokens;
+    for (let i = 0; i < tokens.length - 2; i++) {
+      if (tokens[i].type !== 'blockquote_open') continue;
+      const paraOpen = tokens[i + 1];
+      const inline = tokens[i + 2];
+      if (paraOpen.type !== 'paragraph_open' || inline.type !== 'inline') continue;
+      const m = /^\[!(note|tip|important|warning|caution)\][^\S\r\n]*(?:\r?\n|$)/i.exec(
+        inline.content
+      );
+      if (!m) continue;
+      const type = m[1].toLowerCase();
+
+      // Retag the <blockquote> as <div class="mdv-alert mdv-alert-TYPE">.
+      tokens[i].tag = 'div';
+      tokens[i].attrSet('class', 'mdv-alert mdv-alert-' + type);
+      // Retag the matching close, honouring nested blockquotes.
+      let depth = 1;
+      for (let j = i + 1; j < tokens.length; j++) {
+        if (tokens[j].type === 'blockquote_open') depth++;
+        else if (tokens[j].type === 'blockquote_close' && --depth === 0) {
+          tokens[j].tag = 'div';
+          break;
+        }
+      }
+
+      // Strip the `[!TYPE]` marker line from the first paragraph.
+      inline.content = inline.content.slice(m[0].length);
+      if (inline.content === '') {
+        tokens.splice(i + 1, 3); // marker was alone — drop the now-empty <p>
+      }
+
+      // Inject the title (icon + label) as the alert's first child.
+      const title = new state.Token('html_block', '', 0);
+      title.content =
+        '<p class="mdv-alert-title"><span class="mdv-alert-icon" aria-hidden="true"></span>' +
+        ALERT_LABELS[type] +
+        '</p>\n';
+      tokens.splice(i + 1, 0, title);
+    }
+    return false;
+  });
+}
+
 export function createRenderer(opts = {}) {
   const md = new MarkdownIt({
     html: true, // raw HTML is allowed here, then neutralised by DOMPurify
@@ -131,6 +192,7 @@ export function createRenderer(opts = {}) {
   md.use(abbr);
   md.use(emoji);
   md.use(tasklist, { disabled: true, label: false });
+  md.use(alertPlugin);
 
   // Add header anchors so the table of contents and deep links work.
   md.core.ruler.push('mdv_heading_ids', (state) => {

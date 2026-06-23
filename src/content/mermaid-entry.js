@@ -21,9 +21,23 @@ globalThis.__mdvMermaid = {
       // node, class, state and ER labels still emit <foreignObject> unless the
       // top-level `htmlLabels` is also false. Keep BOTH set.
       htmlLabels: false,
-      flowchart: { htmlLabels: false, useMaxWidth: true },
-      class: { htmlLabels: false },
-      state: { htmlLabels: false },
+      // With htmlLabels:false every label is a native SVG <text> instead of an
+      // HTML box in a <foreignObject>. GitHub keeps HTML labels, so its layout
+      // reserves space for the (wider) label boxes and the graph spreads out on
+      // its own. Our labels are under-measured by the layout, so edge/node
+      // labels crowd and overlap. Compensate by giving the layout more room:
+      // wider gaps between sibling nodes (nodeSpacing) and between ranks
+      // (rankSpacing), plus a little more node padding so text doesn't kiss the
+      // box border. This approximates GitHub's roomier, auto-spaced look.
+      flowchart: {
+        htmlLabels: false,
+        useMaxWidth: true,
+        nodeSpacing: 64,
+        rankSpacing: 64,
+        padding: 14,
+      },
+      class: { htmlLabels: false, useMaxWidth: true },
+      state: { htmlLabels: false, useMaxWidth: true },
       er: { useMaxWidth: true },
       sequence: { useMaxWidth: true },
     });
