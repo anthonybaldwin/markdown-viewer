@@ -90,9 +90,7 @@
   left: 0;
   top: 0;
   z-index: 100;
-  width: 5.5px; /* 0.5px wider than the top leg: horizontal strokes read heavier
-                   than verticals at equal pixel weight, so the vertical bar is
-                   nudged thicker to look balanced. */
+  width: 5px;
   height: 100%;
   background: var(--mdv-accent);
   transition: height 0.1s linear;
