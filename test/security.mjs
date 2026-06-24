@@ -105,6 +105,9 @@ const XSS_VECTORS = [
   '<img src="data:image/svg+xml,<svg onload=alert(1)>">',
   '<a href="\tjavascript:alert(1)">tab</a>',
   '<table background="javascript:alert(1)"><tr><td>x</td></tr></table>',
+  '<video src="javascript:alert(1)" poster="javascript:alert(1)"></video>',
+  '<video><source src="javascript:alert(1)"></video>',
+  '<audio src="javascript:alert(1)"></audio>',
 ];
 
 for (const vec of XSS_VECTORS) {
@@ -161,6 +164,27 @@ check('image gets lazy loading', img.includes('loading="lazy"'));
 
 const dataimg = clean('![x](data:image/png;base64,iVBORw0KGgo=)');
 check('data:image png allowed', dataimg.includes('data:image/png'));
+
+// HTML5 media: <video>/<audio>/<source> are safe (no script, URL schemes are
+// scheme-checked) so they survive sanitization for genuine embeds.
+const video = clean('<video controls src="https://example.com/v.mp4"></video>');
+check('safe video kept', video.includes('<video') && video.includes('v.mp4'));
+const vsrc = clean('<video controls><source src="https://example.com/v.mp4" type="video/mp4"></video>');
+check('video <source> kept', vsrc.includes('<source') && vsrc.includes('v.mp4'));
+const audio = clean('<audio controls src="https://example.com/a.mp3"></audio>');
+check('safe audio kept', audio.includes('<audio') && audio.includes('a.mp3'));
+
+// YouTube: a link ALONE on its own line becomes an inert click-to-load facade
+// (thumbnail + play button) — never a live <iframe>, which stays forbidden.
+const yt = clean('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+check('standalone youtube becomes embed facade', yt.includes('mdv-embed-youtube'));
+check('youtube facade carries the video id', yt.includes('dQw4w9WgXcQ'));
+check('youtube facade is iframe-free', !yt.toLowerCase().includes('<iframe'));
+const ytShort = clean('https://youtu.be/dQw4w9WgXcQ');
+check('youtu.be short link becomes embed facade', ytShort.includes('mdv-embed-youtube'));
+// An inline youtube link inside a sentence is left as an ordinary link.
+const ytInline = clean('Watch https://youtu.be/dQw4w9WgXcQ now.');
+check('inline youtube link is NOT converted', !ytInline.includes('mdv-embed') && ytInline.includes('<a'));
 
 const alert = clean('> [!WARNING]\n> Be careful here.');
 check('alert callout emitted', alert.includes('mdv-alert mdv-alert-warning'));

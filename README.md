@@ -5,6 +5,14 @@ YAML front matter, math (KaTeX + mhchem), syntax highlighting, and Mermaid
 diagrams. Documents are sanitized with DOMPurify before display. Runs only on
 sites you allow.
 
+## Media
+
+Images (including `data:image` URIs) and HTML5 `<video>`/`<audio>` embeds render
+responsively and are sanitized like everything else. A **YouTube link alone on
+its own line** turns into a click-to-load player: you see a thumbnail with a
+play button, and the privacy-friendly `youtube-nocookie` iframe is fetched only
+when you click. Inline YouTube links inside a sentence are left as plain links.
+
 ## Install
 
 1. Open `chrome://extensions` and enable **Developer mode**.

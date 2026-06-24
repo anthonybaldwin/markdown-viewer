@@ -121,6 +121,51 @@ const ALERT_LABELS = {
   caution: 'Caution',
 };
 
+// ── YouTube embeds (standalone links only) ──────────────────────────────
+// A YouTube URL that sits ALONE on its own line becomes a click-to-load video
+// facade — a thumbnail with a play button. We deliberately do NOT touch inline
+// links inside a sentence: only a paragraph that is nothing but a YouTube URL
+// is converted, so ordinary links keep behaving like links.
+//
+// The facade emitted here is inert (a thumbnail image inside an anchor — no
+// <iframe>, which the sanitizer forbids). ui.js swaps in the privacy-friendly
+// youtube-nocookie iframe only on click, from the validated id, so the
+// sanitizer's no-iframe rule keeps protecting untrusted document content.
+const YOUTUBE_RE =
+  /^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#\s]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[?&#][^\s]*)?$/;
+
+function youtubeFacade(id) {
+  // `id` is already validated to [A-Za-z0-9_-]{11} by YOUTUBE_RE, so it is safe
+  // inside both the URL and the attribute without further escaping.
+  const watch = 'https://www.youtube.com/watch?v=' + id;
+  const thumb = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+  return (
+    '<div class="mdv-embed mdv-embed-youtube">' +
+    '<a class="mdv-embed-frame" href="' + watch + '" aria-label="Play YouTube video">' +
+    '<img class="mdv-embed-thumb" src="' + thumb + '" alt="" loading="lazy">' +
+    '<span class="mdv-embed-play" aria-hidden="true"></span>' +
+    '</a></div>\n'
+  );
+}
+
+function youtubePlugin(md) {
+  md.core.ruler.after('block', 'mdv_youtube', (state) => {
+    const tokens = state.tokens;
+    for (let i = 0; i < tokens.length - 2; i++) {
+      if (tokens[i].type !== 'paragraph_open') continue;
+      const inline = tokens[i + 1];
+      const close = tokens[i + 2];
+      if (inline.type !== 'inline' || close.type !== 'paragraph_close') continue;
+      const m = YOUTUBE_RE.exec(inline.content.trim());
+      if (!m) continue;
+      const html = new state.Token('html_block', '', 0);
+      html.content = youtubeFacade(m[1]);
+      tokens.splice(i, 3, html);
+    }
+    return false;
+  });
+}
+
 function alertPlugin(md) {
   // Runs after the block tokenizer but before inline parsing, so editing an
   // inline token's `.content` here is picked up when inline rules run later.
@@ -193,6 +238,7 @@ export function createRenderer(opts = {}) {
   md.use(emoji);
   md.use(tasklist, { disabled: true, label: false });
   md.use(alertPlugin);
+  md.use(youtubePlugin);
 
   // Add header anchors so the table of contents and deep links work.
   md.core.ruler.push('mdv_heading_ids', (state) => {

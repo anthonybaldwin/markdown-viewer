@@ -152,6 +152,27 @@ function enhance(refs, settings) {
     pre.appendChild(btn);
   }
 
+  // Click-to-load video embeds (YouTube). The facade in the document is inert
+  // HTML; the <iframe> is created HERE, by trusted code, from a video id we
+  // re-validate — so the sanitizer's blanket no-iframe rule still applies to
+  // everything that came from the untrusted document.
+  for (const frame of article.querySelectorAll('a.mdv-embed-frame')) {
+    frame.addEventListener('click', (e) => {
+      const m = /[?&]v=([A-Za-z0-9_-]{11})/.exec(frame.getAttribute('href') || '');
+      if (!m) return; // malformed — let the click open the link instead
+      e.preventDefault();
+      const iframe = el('iframe', {
+        class: 'mdv-embed-iframe',
+        src: 'https://www.youtube-nocookie.com/embed/' + m[1] + '?autoplay=1&rel=0',
+        title: 'YouTube video player',
+        allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+        allowfullscreen: true,
+        referrerpolicy: 'strict-origin-when-cross-origin',
+      });
+      frame.replaceWith(iframe);
+    });
+  }
+
   // Wrap content tables for horizontal scroll (not the front-matter table)
   for (const table of article.querySelectorAll('table:not(.mdv-frontmatter)')) {
     if (table.parentElement && table.parentElement.classList.contains('mdv-table-wrap')) continue;
@@ -206,6 +227,12 @@ function setupScrollSpy(refs, headings) {
       else break;
     }
     if (!active && headings.length) active = headings[0];
+    // At the very bottom of the page the final sections can't scroll past the
+    // fold line, so their TOC entries would never light up. Once we've hit the
+    // end, force the last heading active to match where the page actually is.
+    if (headings.length && scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 2) {
+      active = headings[headings.length - 1];
+    }
     for (const a of links.values()) a.classList.remove('is-active');
     if (active && links.has(active.id)) {
       const a = links.get(active.id);
