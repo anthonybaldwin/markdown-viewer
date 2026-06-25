@@ -26,15 +26,57 @@ function pathHasMarkdownExtension(url) {
   }
 }
 
+// Best-effort HTTP status of the top-level navigation, via Navigation Timing.
+// Returns null when unknown (file://, no entry, cross-origin opaque) so callers
+// fall back to rendering rather than blocking.
+function navigationStatus() {
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    const status = nav && nav.responseStatus;
+    return typeof status === 'number' && status > 0 ? status : null;
+  } catch {
+    return null;
+  }
+}
+
+// Heuristic: does this plain-text payload look like Markdown? Used only for
+// allowlisted, extension-less plain-text pages — some docs sites (e.g.
+// Anthropic's) serve raw .md content at URLs that don't end in a markdown
+// extension. Deliberately conservative: require several distinct structural
+// markers so we don't hijack arbitrary prose, logs, or source files.
+function looksLikeMarkdown(text) {
+  if (!text) return false;
+  const sample = text.slice(0, 8000);
+  let score = 0;
+  if (/^#{1,6}[ \t]+\S/m.test(sample)) score += 2;                 // ATX heading
+  if (/^[ \t]*(```|~~~)/m.test(sample)) score += 2;                // fenced code block
+  if (/^[ \t]*([-*+]|\d+\.)[ \t]+\S/m.test(sample)) score += 1;    // list item
+  if (/^>[ \t]?\S/m.test(sample)) score += 1;                      // blockquote
+  if (/^\|.+\|[ \t]*$/m.test(sample) &&
+      /^[ \t]*\|?[ \t:|-]*-{3,}[ \t:|-]*$/m.test(sample)) score += 2; // table
+  if (/!\[[^\]]*\]\([^)\s]+\)/.test(sample)) score += 1;           // image
+  if (/(^|[^!])\[[^\]]+\]\([^)\s]+\)/.test(sample)) score += 1;    // link
+  if (/(\*\*|__)\S[\s\S]*?\1/.test(sample)) score += 1;            // bold
+  if (/`[^`\n]+`/.test(sample)) score += 1;                        // inline code
+  return score >= 3;
+}
+
 // Is this a raw markdown document (as opposed to a normal HTML page)?
 export function isMarkdownCandidate(doc = document) {
+  // Never take over an error response (404 page, etc.): the URL or content type
+  // may still look like markdown, but the body is not the document we want.
+  const status = navigationStatus();
+  if (status !== null && (status < 200 || status >= 300)) return false;
+
   const ct = (doc.contentType || '').toLowerCase();
   if (MD_CONTENT_TYPES.includes(ct)) return true;
 
-  // text/plain (and friends) only when the URL itself names a markdown file —
-  // this avoids hijacking arbitrary plain-text or HTML pages.
-  if (PLAINISH_CONTENT_TYPES.includes(ct) && pathHasMarkdownExtension(doc.URL || location.href)) {
-    return true;
+  if (PLAINISH_CONTENT_TYPES.includes(ct)) {
+    // The URL itself names a markdown file — trust the extension.
+    if (pathHasMarkdownExtension(doc.URL || location.href)) return true;
+    // Otherwise sniff the body: some sites serve raw markdown as plain text at
+    // extension-less URLs. Conservative, to avoid hijacking ordinary text.
+    if (looksLikeMarkdown(getRawMarkdown(doc))) return true;
   }
   return false;
 }
