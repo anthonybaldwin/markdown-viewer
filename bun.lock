@@ -14,7 +14,7 @@
         "katex": "^0.17.0",
         "markdown-it": "^14.2.0",
         "markdown-it-abbr": "^2.0.0",
-        "markdown-it-deflist": "^3.0.1",
+        "markdown-it-deflist": "^4.0.0",
         "markdown-it-emoji": "^3.0.0",
         "markdown-it-footnote": "^4.0.0",
         "markdown-it-ins": "^4.0.0",
@@ -382,7 +382,7 @@
 
     "markdown-it-abbr": ["markdown-it-abbr@2.0.0", "", {}, "sha512-of7C8pXSjXjDojW4neNP+jD7inUYH/DO0Ca+K/4FUEccg0oHAEX/nfscw0jfz66PJbYWOAT9U8mjO21X5p6aAw=="],
 
-    "markdown-it-deflist": ["markdown-it-deflist@3.0.1", "", {}, "sha512-pPtXxihDMi9jrwLLQ+Jra/FM20F/FFJWiVjXf0Js6Lwp7LFj+MuK6cUJNMVTRL+n9d/JqF4MEqYZwSMgVodK5g=="],
+    "markdown-it-deflist": ["markdown-it-deflist@4.0.0", "", {}, "sha512-06186ZWDwNLg638THD70MxBeFrDMF0+nL7IWU/qwCGHGOcUIm4MTYXbfjpv0ooWnVjkSnAjW8msKaOQmNRfY6Q=="],
 
     "markdown-it-emoji": ["markdown-it-emoji@3.0.0", "", {}, "sha512-+rUD93bXHubA4arpEZO3q80so0qgoFJEKRkRbjKX8RTdca89v2kfyF+xR3i2sQTwql9tpPZPOQN5B+PunspXRg=="],
 
