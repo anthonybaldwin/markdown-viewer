@@ -5,7 +5,7 @@
     "": {
       "name": "markdown-viewer",
       "devDependencies": {
-        "@mdit/plugin-tasklist": "^0.23.2",
+        "@mdit/plugin-tasklist": "^1.0.2",
         "dompurify": "^3.4.11",
         "esbuild": "^0.28.1",
         "highlight.js": "^11.11.1",
@@ -170,7 +170,7 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.35.2", "", { "os": "win32", "cpu": "x64" }, "sha512-imoOyBcoM/iiUr4J6VPpCNjPnjvP/Gks95898yB8YqoGGYmHYbOyCuNv9FMhFgtaiHFGbHW8bxKqRV6VjtXThQ=="],
 
-    "@mdit/plugin-tasklist": ["@mdit/plugin-tasklist@0.23.2", "", { "dependencies": { "@types/markdown-it": "^14.1.2" }, "peerDependencies": { "markdown-it": "^14.1.0" }, "optionalPeers": ["markdown-it"] }, "sha512-9vpH3ZG2JmB3SqYfXmRXk9mI5Q6U+KO30quNH1PN5lp5gQtW4kceWhfAPeQtSMemNV4KuCyns+6PRX8zD9Sajw=="],
+    "@mdit/plugin-tasklist": ["@mdit/plugin-tasklist@1.0.2", "", { "dependencies": { "@types/markdown-it": "^14.1.2" }, "peerDependencies": { "markdown-it": "^14.2.0" }, "optionalPeers": ["markdown-it"] }, "sha512-h+WCr/h+K0pbyZdJnrPEpgeMFlffzqfviY3TDmj7PdZiVAS1YF1s95+tt9bvmJWKPrALV/IgePxsu5LWnODMmw=="],
 
     "@mermaid-js/parser": ["@mermaid-js/parser@1.1.1", "", { "dependencies": { "@chevrotain/types": "~11.1.1" } }, "sha512-VuHdsYMK1bT6X2JbcAaWAhugTRvRBRyuZgd+c22swUeI9g/ntaxF7CY7dYarhZovofCbUNO0G7JesfmNtjYOCw=="],
 

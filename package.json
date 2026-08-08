@@ -15,7 +15,7 @@
     "dist": "bun run build && bun run icons && bun run test"
   },
   "devDependencies": {
-    "@mdit/plugin-tasklist": "^0.23.2",
+    "@mdit/plugin-tasklist": "^1.0.2",
     "dompurify": "^3.4.11",
     "esbuild": "^0.28.1",
     "highlight.js": "^11.11.1",
