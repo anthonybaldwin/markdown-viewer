@@ -100,7 +100,7 @@ export function buildViewer({ safeHtml, rawSource, title, settings }) {
   root.append(snakeLeft, snakeTop, bar, layout);
 
   const refs = {
-    root, layout, article, rawPre, tocNav, snakeFill, snakeLeft, barDot,
+    root, layout, article, rawPre, tocNav, rail, snakeFill, snakeLeft, barDot,
     themeBtn, widthBtn, rawBtn, printBtn, railToggle, scrim,
   };
   enhance(refs, settings);
@@ -189,16 +189,17 @@ function enhance(refs, settings) {
     const target = id && document.getElementById(id);
     if (!target) return;
     e.preventDefault();
+    refs.spy.pin(id);
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     history.replaceState(null, '', '#' + id);
     if (matchMedia('(max-width: 1080px)').matches) root.removeAttribute('data-rail-open');
   });
 
-  setupScrollSpy(refs, headings);
+  refs.spy = setupScrollSpy(refs, headings);
 }
 
 function setupScrollSpy(refs, headings) {
-  const { tocNav, snakeFill, snakeLeft } = refs;
+  const { tocNav, snakeFill, snakeLeft, rail } = refs;
   const links = new Map();
   for (const a of tocNav.querySelectorAll('a')) {
     links.set(decodeURIComponent(a.getAttribute('href').slice(1)), a);
@@ -207,6 +208,28 @@ function setupScrollSpy(refs, headings) {
   // Gutter Snake: the top leg grows across the full scroll range; the left leg
   // holds at 100% until LEFT_START%, then drains to 0 over the remaining span.
   const LEFT_START = 70;
+
+  // A clicked anchor pins its heading as the active one. Geometry alone can't
+  // get this right: a heading near the end of the document may never be able
+  // to cross the fold line, and mid-animation the spy would walk the highlight
+  // through every heading it passes. The pin is released when scrolling
+  // settles or the user takes over.
+  let pinned = null;
+
+  const paint = (active) => {
+    for (const a of links.values()) a.classList.remove('is-active');
+    if (!active || !links.has(active.id)) return;
+    const a = links.get(active.id);
+    a.classList.add('is-active');
+    // Keep the active item visible in the rail by adjusting the rail's own
+    // scrollTop. scrollIntoView() must not be used here: it cancels an
+    // in-flight smooth scroll of the document, freezing anchor navigation
+    // partway and leaving the wrong entry highlighted.
+    const rr = rail.getBoundingClientRect();
+    const ar = a.getBoundingClientRect();
+    if (ar.top < rr.top + 40) rail.scrollTop += ar.top - (rr.top + 40);
+    else if (ar.bottom > rr.bottom - 40) rail.scrollTop += ar.bottom - (rr.bottom - 40);
+  };
 
   let ticking = false;
   const update = () => {
@@ -219,6 +242,12 @@ function setupScrollSpy(refs, headings) {
       pct <= LEFT_START ? 100 : 100 - ((pct - LEFT_START) / (100 - LEFT_START)) * 100;
     snakeLeft.style.height = leftPct + '%';
 
+    if (pinned) {
+      const h = document.getElementById(pinned);
+      if (h) return paint(h);
+      pinned = null;
+    }
+
     // active heading = last heading whose top is above the fold line
     const line = 90;
     let active = null;
@@ -227,35 +256,37 @@ function setupScrollSpy(refs, headings) {
       else break;
     }
     if (!active && headings.length) active = headings[0];
-    // At the very bottom of the page the final sections can't scroll past the
-    // fold line, so their TOC entries would never light up. Once we've hit the
-    // end, force the last heading active to match where the page actually is.
-    if (headings.length && scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 2) {
+    // At the very bottom of a scrollable page the final sections can't climb
+    // past the fold line, so their TOC entries would never light up. Once
+    // we've hit the end, force the last heading active to match where the
+    // page actually is. (Skip on pages too short to scroll: "the end" is also
+    // "the start" there, and the fold-line pick is the honest one.)
+    if (headings.length && docH > 0 && docH - scrollTop < 2) {
       active = headings[headings.length - 1];
     }
-    for (const a of links.values()) a.classList.remove('is-active');
-    if (active && links.has(active.id)) {
-      const a = links.get(active.id);
-      a.classList.add('is-active');
-      // keep active item visible in the rail
-      const rail = refs.root.querySelector('.mdv-rail');
-      if (rail) {
-        const ar = a.getBoundingClientRect();
-        const rr = rail.getBoundingClientRect();
-        if (ar.top < rr.top + 40 || ar.bottom > rr.bottom - 40) {
-          a.scrollIntoView({ block: 'nearest' });
-        }
-      }
-    }
+    paint(active);
   };
   const onScroll = () => {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(update);
   };
+  const unpin = () => { pinned = null; };
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
+  window.addEventListener('scrollend', unpin, { passive: true });
+  window.addEventListener('wheel', unpin, { passive: true });
+  window.addEventListener('touchmove', unpin, { passive: true });
   update();
+
+  return {
+    update,
+    pin(id) {
+      if (!links.has(id)) return;
+      pinned = id;
+      paint(document.getElementById(id));
+    },
+  };
 }
 
 // Wire the toolbar buttons. Callbacks let callers persist state / re-render.
