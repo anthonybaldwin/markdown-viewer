@@ -127,6 +127,17 @@ async function run() {
   }
   refs.root.setAttribute('data-soft-wrap', settings.softWrapCode ? '1' : '0');
 
+  // The viewer was built detached, so the scroll spy's first pass saw empty
+  // rects; re-sync it now that the DOM is live. Chrome's own fragment scroll
+  // happened against the raw page we just replaced, so honor the hash here.
+  const hash = decodeURIComponent(location.hash.slice(1));
+  const anchorTarget = hash && document.getElementById(hash);
+  if (anchorTarget) {
+    refs.spy.pin(hash);
+    anchorTarget.scrollIntoView({ block: 'start' });
+  }
+  refs.spy.update();
+
   // First-heading title is nicer than the bare filename when available.
   const h1 = refs.article.querySelector('h1');
   document.title = (h1 && h1.textContent.trim()) || title;
