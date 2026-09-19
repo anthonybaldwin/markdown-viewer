@@ -15,14 +15,14 @@
     "dist": "bun run build && bun run icons && bun run test"
   },
   "devDependencies": {
-    "@mdit/plugin-tasklist": "^1.0.2",
-    "dompurify": "^3.4.13",
-    "esbuild": "^0.28.1",
-    "highlight.js": "^11.11.1",
-    "js-yaml": "^5.2.3",
+    "@mdit/plugin-tasklist": "^1.1.1",
+    "dompurify": "^3.4.15",
+    "esbuild": "^0.28.2",
+    "highlight.js": "^11.12.0",
+    "js-yaml": "^5.4.2",
     "jsdom": "^30.0.1",
-    "katex": "^0.18.1",
-    "markdown-it": "^15.0.0",
+    "katex": "^0.18.7",
+    "markdown-it": "^15.0.2",
     "markdown-it-abbr": "^2.0.0",
     "markdown-it-deflist": "^4.0.0",
     "markdown-it-emoji": "^3.1.0",
@@ -33,6 +33,6 @@
     "markdown-it-sup": "^2.0.0",
     "markdown-it-texmath": "^1.0.0",
     "mermaid": "^11.16.1",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.4"
   }
 }
