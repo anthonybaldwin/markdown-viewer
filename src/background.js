@@ -118,6 +118,8 @@ function injectInto(sender, files) {
   });
 }
 
+const OPENABLE_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'ftps:']);
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || !sender.tab) return;
 
@@ -136,6 +138,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: false });
       });
     return true; // keep the channel open for the async response
+  }
+
+  // Open a document link in a new tab. Pages served with a CSP `sandbox`
+  // (e.g. raw.githubusercontent.com) block target=_blank popups, so the
+  // viewer asks us instead. Re-validate the URL here: only plain web links.
+  if (msg.type === 'mdv-open-link') {
+    let url;
+    try {
+      url = new URL(msg.url);
+    } catch {
+      return;
+    }
+    if (!OPENABLE_PROTOCOLS.has(url.protocol)) return;
+    chrome.tabs
+      .create({
+        url: url.href,
+        active: msg.active !== false,
+        openerTabId: sender.tab.id,
+        index: sender.tab.index + 1,
+      })
+      .catch((e) => console.warn('[markdown-viewer] failed to open link:', e));
+    return;
   }
 
   if (msg.type === 'mdv-sync') {
