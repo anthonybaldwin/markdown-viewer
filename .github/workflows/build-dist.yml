@@ -1,0 +1,43 @@
+# Rebuild the committed bundles (dist/, vendor/katex/) after every merge to
+# main so they always match src/ and the locked dependencies. A newer run
+# cancels an older one; the latest commit is the only one worth building.
+# Pushes made with GITHUB_TOKEN don't trigger workflows, so this can't loop.
+name: Build dist
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-dist
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: bun run test
+
+      - name: Commit updated bundles
+        run: |
+          git add dist vendor
+          if git diff --cached --quiet; then
+            echo "dist/ is up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Rebuild dist for ${GITHUB_SHA::7}"
+          git push

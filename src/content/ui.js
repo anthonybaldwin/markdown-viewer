@@ -195,6 +195,25 @@ function enhance(refs, settings) {
     if (matchMedia('(max-width: 1080px)').matches) root.removeAttribute('data-rail-open');
   });
 
+  // External links: open via the background worker. Hosts that serve the
+  // document with a CSP `sandbox` (no allow-popups) silently block
+  // target=_blank, so the browser can't do it for us. Middle/ctrl/cmd-click
+  // open in the background, like a normal link.
+  const openExternal = (e) => {
+    if (e.defaultPrevented || (e.type === 'click' && e.button !== 0) || (e.type === 'auxclick' && e.button !== 1)) return;
+    const a = e.target.closest && e.target.closest('a[target="_blank"][href]');
+    if (!a || !/^(?:https?|ftps?):/i.test(a.href)) return;
+    e.preventDefault();
+    const background = e.button === 1 || e.ctrlKey || e.metaKey;
+    try {
+      chrome.runtime.sendMessage({ type: 'mdv-open-link', url: a.href, active: !background });
+    } catch {
+      /* background not reachable; nothing to do */
+    }
+  };
+  root.addEventListener('click', openExternal);
+  root.addEventListener('auxclick', openExternal);
+
   refs.spy = setupScrollSpy(refs, headings);
 }
 
