@@ -43,6 +43,9 @@ bun run test     # sanitization tests
 bun run demo     # live preview at http://localhost:8137
 ```
 
+`dist/` and `vendor/katex/` are rebuilt and committed automatically on every
+merge to `main` (`.github/workflows/build-dist.yml`).
+
 ## License
 
 MIT © Anthony Baldwin. Bundled libraries keep their own licenses — see
